@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 from functools import wraps
 from cookielib import Cookie, LWPCookieJar
+from .ghostproxy import GhostNetworkReply
 
 __version__ = "0.1b3"
 
@@ -109,6 +110,17 @@ class QTMessageProxy(object):
             Logger.log(msg, sender='QT', level='fatal')
         elif self.debug:
             Logger.log(msg, sender='QT', level='info')
+
+
+class GhostNetworkAccessManager(QNetworkAccessManager):
+    def __init__(self):
+        QNetworkAccessManager.__init__(self)
+
+    def createRequest(self, operation, request, data):
+        reply = QNetworkAccessManager.createRequest(self, operation, 
+            request, data)
+        ghost_reply = GhostNetworkReply(self, reply)
+        return ghost_reply
 
 
 class GhostWebPage(QtWebKit.QWebPage):
@@ -274,7 +286,7 @@ class Ghost(object):
             download_images=True,
             qt_debug=False,
             show_scrollbars=True,
-            network_access_manager_class=None):
+            network_access_manager_class=GhostNetworkAccessManager):
 
         self.http_resources = []
 
