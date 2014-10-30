@@ -217,6 +217,11 @@ class HttpResource(object):
     def __init__(self, reply, cache, content=None):
         self.url = reply.url().toString()
         self.content = content
+        if self.content is None:
+            try:
+                content = reply.readAllData()
+            except:
+                pass
         if cache and self.content is None:
             # Tries to get back content from cache
             buffer = None
